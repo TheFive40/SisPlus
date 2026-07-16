@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gestión de Cargues — SisPlus</title>
-    <link rel="stylesheet" href="/css/cargues.css?v=5" th:href="@{/css/cargues.css?v=5}">
-    <script src="/js/cargues.js?v=8" th:src="@{/js/cargues.js?v=8}" defer></script>
+    <link rel="stylesheet" href="/css/cargues.css?v=10" th:href="@{/css/cargues.css?v=10}">
+    <script src="/js/cargues.js?v=10" th:src="@{/js/cargues.js?v=10}" defer></script>
 </head>
 <body>
 
@@ -31,47 +31,8 @@
     </div>
 </div>
 
-<div class="sidebar" id="sidebar">
-    <div class="nav-section">
-        <div class="nav-section-label">Principal</div>
-        <a href="/dashboard" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Dashboard
-        </a>
-        <a href="/employee" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Empleados
-        </a>
-        <a href="/assistance" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Asistencias
-        </a>
-        <a href="/cargues" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 18 16 18 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            Gestión de Cargues
-        </a>
-        <a href="/payroll" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Nómina
-        </a>
-        <a href="/reports" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Reportes
-        </a>
-    </div>
-    <div class="nav-divider"></div>
-    <div class="nav-section">
-        <div class="nav-section-label">Sistema</div>
-        <a href="/admin" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Administradores
-        </a>
-        <a href="/config" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l-.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Configuración
-        </a>
-    </div>
-</div>
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar(activePage='cargues')}"></div>
 
 <div class="main-content" id="mainContent">
     <div class="content-area">
@@ -145,13 +106,17 @@
         <div class="section-header">
             <h2 class="section-title">Flota del día</h2>
             <div class="section-actions">
-                <button class="btn btn-secondary" onclick="openDriverModal()">
+                <button class="btn btn-secondary" onclick="openDriversModal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    Conductor
+                    Conductores
                 </button>
                 <button class="btn btn-secondary" onclick="generateReport()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
                     Ver resumen
+                </button>
+                <button class="btn btn-secondary" onclick="openBulkSettlementModal()">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12l2 2 4-4"/><path d="M22 12h-4l-3 3V7h4l3 3z"/><path d="M2 12h5l3 3V9l-3-3H2z"/></svg>
+                    Cierre masivo
                 </button>
                 <button class="btn btn-primary" onclick="openVehicleModal()">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="15" height="10" rx="1"/><path d="M16 11h3l3 3v2a1 1 0 0 1-1 1h-1"/><circle cx="6" cy="18" r="2"/><circle cx="19" cy="18" r="2"/></svg>
@@ -363,32 +328,38 @@
                 <div class="vehicle-preview-form" id="settlementVehiclePreview"></div>
                 <div class="form-row">
                     <div class="field-group">
-                        <label class="field-label">Entregado</label>
-                        <input type="number" id="setDelivered" class="field-input" min="0" step="1">
-                    </div>
-                    <div class="field-group">
-                        <label class="field-label">Devolución</label>
-                        <input type="number" id="setReturned" class="field-input" min="0" step="1">
-                    </div>
-                </div>
-                <div class="form-row">
-                    <div class="field-group">
                         <label class="field-label">Efectivo</label>
-                        <input type="number" id="setCash" class="field-input" min="0" step="1">
+                        <input type="text" id="setCash" class="field-input" oninput="formatNumberInput(this); updateSettlementCalculation()">
                     </div>
                     <div class="field-group">
                         <label class="field-label">Monedas</label>
-                        <input type="number" id="setCoins" class="field-input" min="0" step="1">
+                        <input type="text" id="setCoins" class="field-input" oninput="formatNumberInput(this); updateSettlementCalculation()">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="field-group">
                         <label class="field-label">QR</label>
-                        <input type="number" id="setQr" class="field-input" min="0" step="1">
+                        <input type="text" id="setQr" class="field-input" oninput="formatNumberInput(this); updateSettlementCalculation()">
                     </div>
                     <div class="field-group">
+                        <label class="field-label">Devolución</label>
+                        <input type="text" id="setReturned" class="field-input" oninput="formatNumberInput(this); updateSettlementCalculation()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field-group">
                         <label class="field-label">Seguridad</label>
-                        <input type="number" id="setSecurity" class="field-input" min="0" step="1">
+                        <input type="text" id="setSecurity" class="field-input" oninput="formatNumberInput(this)">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Gasto</label>
+                        <input type="text" id="setExpense" class="field-input" oninput="formatNumberInput(this)">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="field-group">
+                        <label class="field-label">Total entregado</label>
+                        <input type="text" id="setDelivered" class="field-input" readonly>
                     </div>
                 </div>
                 <div class="settlement-validation" id="settlementValidation"></div>
@@ -401,33 +372,92 @@
     </div>
 </div>
 
-<!-- Modal: Conductor -->
-<div class="modal-backdrop" id="modalDriver">
-    <div class="modal" style="max-width:400px">
+<!-- Modal: Cierre masivo -->
+<div class="modal-backdrop" id="modalBulkSettlement">
+    <div class="modal" style="max-width:520px">
         <div class="modal-head">
-            <span class="modal-title">Conductor</span>
-            <button class="modal-close" onclick="closeDriverModal()">×</button>
+            <span class="modal-title">Cierre masivo de jornada</span>
+            <button class="modal-close" onclick="closeBulkSettlementModal()">×</button>
         </div>
-        <form id="driverForm" onsubmit="saveDriver(event)">
+        <form id="bulkSettlementForm" onsubmit="saveBulkSettlement(event)">
             <div class="modal-body">
-                <input type="hidden" id="driverId">
-                <div class="driver-avatar-lg">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                <div class="info-banner" id="bulkSettlementInfo" style="margin-bottom:16px"></div>
+                <div class="form-row">
+                    <div class="field-group">
+                        <label class="field-label">Efectivo</label>
+                        <input type="text" id="bulkCash" class="field-input" oninput="formatNumberInput(this); updateBulkSettlementCalculation()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Monedas</label>
+                        <input type="text" id="bulkCoins" class="field-input" oninput="formatNumberInput(this); updateBulkSettlementCalculation()">
+                    </div>
                 </div>
-                <div class="field-group">
-                    <label class="field-label">Nombre *</label>
-                    <input type="text" id="driverName" class="field-input" required>
+                <div class="form-row">
+                    <div class="field-group">
+                        <label class="field-label">QR</label>
+                        <input type="text" id="bulkQr" class="field-input" oninput="formatNumberInput(this); updateBulkSettlementCalculation()">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Devolución</label>
+                        <input type="text" id="bulkReturned" class="field-input" oninput="formatNumberInput(this); updateBulkSettlementCalculation()">
+                    </div>
                 </div>
-                <div class="field-group">
-                    <label class="field-label">Teléfono</label>
-                    <input type="text" id="driverPhone" class="field-input">
+                <div class="form-row">
+                    <div class="field-group">
+                        <label class="field-label">Seguridad</label>
+                        <input type="text" id="bulkSecurity" class="field-input" oninput="formatNumberInput(this)">
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Gasto</label>
+                        <input type="text" id="bulkExpense" class="field-input" oninput="formatNumberInput(this)">
+                    </div>
                 </div>
+                <div class="form-row">
+                    <div class="field-group">
+                        <label class="field-label">Total entregado</label>
+                        <input type="text" id="bulkDelivered" class="field-input" readonly>
+                    </div>
+                </div>
+                <div class="settlement-validation" id="bulkSettlementValidation"></div>
             </div>
             <div class="modal-foot">
-                <button type="button" class="btn btn-secondary" onclick="closeDriverModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Guardar</button>
+                <button type="button" class="btn btn-secondary" onclick="closeBulkSettlementModal()">Cancelar</button>
+                <button type="submit" class="btn btn-primary" id="bulkSettlementSubmitBtn">Guardar cierre masivo</button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Modal: Conductores -->
+<div class="modal-backdrop" id="modalDrivers">
+    <div class="modal" style="max-width:460px">
+        <div class="modal-head">
+            <span class="modal-title">Conductores</span>
+            <button class="modal-close" onclick="closeDriversModal()">×</button>
+        </div>
+        <div class="modal-body">
+            <div id="driversList" style="margin-bottom:20px"></div>
+            <form id="driverForm" onsubmit="saveDriver(event)" style="border-top:1px solid var(--gray-200);padding-top:16px">
+                <h4 id="driverFormTitle" style="font-size:14px;font-weight:500;margin-bottom:12px;color:var(--gray-800)">Nuevo conductor</h4>
+                <input type="hidden" id="driverId">
+                <div class="form-grid">
+                    <div class="field-group">
+                        <label class="field-label">Nombre *</label>
+                        <input type="text" id="driverName" class="field-input" required>
+                    </div>
+                    <div class="field-group">
+                        <label class="field-label">Teléfono</label>
+                        <input type="text" id="driverPhone" class="field-input">
+                    </div>
+                </div>
+                <div style="margin-top:12px">
+                    <button type="submit" class="btn btn-primary btn-sm">Guardar conductor</button>
+                </div>
+            </form>
+        </div>
+        <div class="modal-foot">
+            <button type="button" class="btn btn-secondary" onclick="closeDriversModal()">Cerrar</button>
+        </div>
     </div>
 </div>
 

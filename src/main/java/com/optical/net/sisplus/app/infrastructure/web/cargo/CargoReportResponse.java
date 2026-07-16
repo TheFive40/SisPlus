@@ -21,6 +21,7 @@ public class CargoReportResponse {
     private Double totalCash;
     private Double totalQr;
     private Double totalSecurity;
+    private Double totalExpense;
     private Double grandTotal;
     private Long deliveredCount;
     private Long pendingCount;

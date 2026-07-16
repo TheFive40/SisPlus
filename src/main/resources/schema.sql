@@ -1,5 +1,5 @@
 -- Limpieza de columnas obsoletas que ddl-auto=update no elimina automáticamente
-ALTER TABLE cargo_loads DROP COLUMN IF EXISTS expected_income;
-ALTER TABLE cargo_settlements DROP COLUMN IF EXISTS consignment;
-ALTER TABLE cargo_settlements DROP COLUMN IF EXISTS expenses;
-ALTER TABLE company_expenses DROP COLUMN IF EXISTS category;
+-- ALTER TABLE cargo_loads DROP COLUMN IF EXISTS expected_income;
+-- ALTER TABLE cargo_settlements DROP COLUMN IF EXISTS consignment;
+-- ALTER TABLE cargo_settlements DROP COLUMN IF EXISTS expenses;
+-- ALTER TABLE company_expenses DROP COLUMN IF EXISTS category;

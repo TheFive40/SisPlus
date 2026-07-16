@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -19,17 +20,20 @@ public class CargoService {
     private final CargoLoadRepository cargoLoadRepository;
     private final CargoSettlementRepository cargoSettlementRepository;
     private final CompanyExpenseService companyExpenseService;
+    private final EmailService emailService;
 
     public CargoService(DriverRepository driverRepository,
                         VehicleRepository vehicleRepository,
                         CargoLoadRepository cargoLoadRepository,
                         CargoSettlementRepository cargoSettlementRepository,
-                        CompanyExpenseService companyExpenseService) {
+                        CompanyExpenseService companyExpenseService,
+                        EmailService emailService) {
         this.driverRepository = driverRepository;
         this.vehicleRepository = vehicleRepository;
         this.cargoLoadRepository = cargoLoadRepository;
         this.cargoSettlementRepository = cargoSettlementRepository;
         this.companyExpenseService = companyExpenseService;
+        this.emailService = emailService;
     }
 
     /* ── Drivers ── */
@@ -81,14 +85,32 @@ public class CargoService {
 
     @Transactional
     public VehicleResponse createVehicle(VehicleRequest request) {
+        String plate = request.getPlate() != null ? request.getPlate().trim() : null;
+        java.util.Optional<Vehicle> existing = vehicleRepository.findByPlateIgnoreCase(plate);
+        if (existing.isPresent()) {
+            Vehicle vehicle = existing.get();
+            if (vehicle.isActive()) {
+                throw new IllegalArgumentException("Ya existe un carro activo con la placa " + plate);
+            }
+            // Reactivar vehículo previamente desactivado
+            Driver driver = request.getDriverId() != null
+                    ? driverRepository.findById(request.getDriverId()).orElse(null)
+                    : null;
+            vehicle.setName(request.getName());
+            vehicle.setPlate(plate);
+            vehicle.setDriver(driver);
+            vehicle.setActive(true);
+            return toVehicleResponse(vehicleRepository.save(vehicle));
+        }
+
         Driver driver = request.getDriverId() != null
                 ? driverRepository.findById(request.getDriverId()).orElse(null)
                 : null;
         Vehicle vehicle = Vehicle.builder()
-                .plate(request.getPlate())
+                .plate(plate)
                 .name(request.getName())
                 .driver(driver)
-                .active(request.getActive() == null || request.getActive())
+                .active(true)
                 .build();
         return toVehicleResponse(vehicleRepository.save(vehicle));
     }
@@ -125,6 +147,7 @@ public class CargoService {
     public List<CargoLoadResponse> getLoadsByDate(LocalDate date) {
         if (date == null) date = LocalDate.now();
         return cargoLoadRepository.findByLoadDateWithSettlement(date).stream()
+                .filter(l -> l.getVehicle() != null && l.getVehicle().isActive())
                 .map(this::toCargoLoadResponse)
                 .collect(Collectors.toList());
     }
@@ -189,17 +212,124 @@ public class CargoService {
         CargoSettlement settlement = cargoSettlementRepository.findByCargoLoadId(load.getId())
                 .orElse(CargoSettlement.builder().cargoLoad(load).build());
 
-        settlement.setDeliveredValue(request.getDeliveredValue());
         settlement.setReturnedValue(request.getReturnedValue());
         settlement.setCoins(request.getCoins());
         settlement.setCash(request.getCash());
         settlement.setQr(request.getQr());
         settlement.setSecurity(request.getSecurity());
+        settlement.setExpense(request.getExpense());
         settlement.calculateTotal();
+
+        // Validación: Entregado + Devolución = Mercancía total
+        double merchandise = zeroIfNull(load.getMerchandiseValue());
+        double delivered = zeroIfNull(settlement.getDeliveredValue());
+        double returned = zeroIfNull(settlement.getReturnedValue());
+        if (Math.abs((delivered + returned) - merchandise) > 0.01) {
+            throw new IllegalArgumentException(
+                    String.format("Entregado ($%,.0f) + Devolución ($%,.0f) debe ser igual a la mercancía ($%,.0f)",
+                            delivered, returned, merchandise));
+        }
 
         cargoSettlementRepository.save(settlement);
         load.setSettlement(settlement);
+
+        try {
+            CargoReportResponse report = getReportByDate(load.getLoadDate());
+            emailService.sendSettlementReport(report);
+        } catch (Exception e) {
+            // El envío de correo no debe fallar el cierre de jornada
+            System.err.println("Error enviando reporte por correo: " + e.getMessage());
+        }
+
         return toCargoLoadResponse(load);
+    }
+
+    @Transactional
+    public List<CargoLoadResponse> createBulkSettlement(BulkSettlementRequest request) {
+        LocalDate date = request.getDate() == null ? LocalDate.now() : request.getDate();
+        List<CargoLoad> loads = cargoLoadRepository.findByLoadDateWithSettlement(date).stream()
+                .filter(l -> l.getSettlement() == null)
+                .filter(l -> l.getVehicle() != null && l.getVehicle().isActive())
+                .collect(Collectors.toList());
+
+        if (loads.isEmpty()) {
+            throw new IllegalArgumentException("No hay carros pendientes por cerrar");
+        }
+
+        double totalMerchandise = loads.stream().mapToDouble(l -> zeroIfNull(l.getMerchandiseValue())).sum();
+        double totalCash = zeroIfNull(request.getCash());
+        double totalCoins = zeroIfNull(request.getCoins());
+        double totalQr = zeroIfNull(request.getQr());
+        double totalReturned = zeroIfNull(request.getReturnedValue());
+        double totalSecurity = zeroIfNull(request.getSecurity());
+        double totalExpense = zeroIfNull(request.getExpense());
+        double totalDelivered = totalCash + totalCoins + totalQr;
+
+        if (Math.abs((totalDelivered + totalReturned) - totalMerchandise) > 0.01) {
+            throw new IllegalArgumentException(
+                    String.format("Entregado ($%,.0f) + Devolución ($%,.0f) debe ser igual a la mercancía total ($%,.0f)",
+                            totalDelivered, totalReturned, totalMerchandise));
+        }
+
+        List<CargoLoadResponse> responses = new ArrayList<>();
+        double distributedCash = 0, distributedCoins = 0, distributedQr = 0;
+        double distributedReturned = 0, distributedSecurity = 0, distributedExpense = 0;
+
+        for (int i = 0; i < loads.size(); i++) {
+            CargoLoad load = loads.get(i);
+            boolean isLast = i == loads.size() - 1;
+            double merchandise = zeroIfNull(load.getMerchandiseValue());
+            double ratio = totalMerchandise > 0 ? merchandise / totalMerchandise : 0;
+
+            double cash, coins, qr, returned, security, expense;
+            if (isLast) {
+                cash = totalCash - distributedCash;
+                coins = totalCoins - distributedCoins;
+                qr = totalQr - distributedQr;
+                returned = totalReturned - distributedReturned;
+                security = totalSecurity - distributedSecurity;
+                expense = totalExpense - distributedExpense;
+            } else {
+                cash = Math.round(totalCash * ratio);
+                coins = Math.round(totalCoins * ratio);
+                qr = Math.round(totalQr * ratio);
+                returned = Math.round(totalReturned * ratio);
+                security = Math.round(totalSecurity * ratio);
+                expense = Math.round(totalExpense * ratio);
+                distributedCash += cash;
+                distributedCoins += coins;
+                distributedQr += qr;
+                distributedReturned += returned;
+                distributedSecurity += security;
+                distributedExpense += expense;
+            }
+
+            CargoSettlement settlement = CargoSettlement.builder()
+                    .cargoLoad(load)
+                    .cash(cash)
+                    .coins(coins)
+                    .qr(qr)
+                    .returnedValue(returned)
+                    .security(security)
+                    .expense(expense)
+                    .build();
+            settlement.calculateTotal();
+            cargoSettlementRepository.save(settlement);
+            load.setSettlement(settlement);
+            load.setStatus(CargoStatus.ENTREGADO);
+            cargoLoadRepository.save(load);
+
+            responses.add(toCargoLoadResponse(load));
+        }
+
+        try {
+            CargoReportResponse report = getReportByDate(date);
+            emailService.sendSettlementReport(report);
+        } catch (Exception e) {
+            System.err.println("Error enviando reporte por correo: " + e.getMessage());
+        }
+
+        return responses;
     }
 
     /* ── Report ── */
@@ -217,6 +347,7 @@ public class CargoService {
         double totalCash = sumSettlements(loads, CargoSettlement::getCash);
         double totalQr = sumSettlements(loads, CargoSettlement::getQr);
         double totalSecurity = sumSettlements(loads, CargoSettlement::getSecurity);
+        double totalExpense = sumSettlements(loads, CargoSettlement::getExpense);
         double grandTotal = sumSettlements(loads, CargoSettlement::getTotal);
 
         long deliveredCount = loads.stream().filter(l -> l.getStatus() == CargoStatus.ENTREGADO).count();
@@ -241,6 +372,7 @@ public class CargoService {
                 .totalCash(totalCash)
                 .totalQr(totalQr)
                 .totalSecurity(totalSecurity)
+                .totalExpense(totalExpense)
                 .grandTotal(grandTotal)
                 .deliveredCount(deliveredCount)
                 .pendingCount(pendingCount)
@@ -293,9 +425,14 @@ public class CargoService {
                 .cash(settlement.getCash())
                 .qr(settlement.getQr())
                 .security(settlement.getSecurity())
+                .expense(settlement.getExpense())
                 .total(settlement.getTotal())
                 .settlementDate(settlement.getSettlementDate())
                 .build();
+    }
+
+    private double zeroIfNull(Double value) {
+        return value == null ? 0.0 : value;
     }
 
     private double sum(List<CargoLoad> loads, java.util.function.Function<CargoLoad, Double> extractor) {

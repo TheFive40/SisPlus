@@ -44,9 +44,11 @@ public class UserService {
         String safeName = sanitizeName(request.getName(), "name");
         String safeLastName = sanitizeName(request.getLastName(), "lastName");
         String safeCc = xssSanitizer.sanitizeCc(request.getCc());
+        String safeZkPin = sanitizeZkPin(request.getZkPin());
         double safeSalary = resolveSalary(request.getSalary());
 
         validateUserFields(safeName, safeLastName, safeCc);
+        validateZkPin(safeZkPin);
         validateSalary(safeSalary);
 
         log.info("Creando nuevo usuario con CC: {}", safeCc);
@@ -55,6 +57,7 @@ public class UserService {
                 .name(safeName)
                 .lastName(safeLastName)
                 .cc(safeCc)
+                .zkPin(safeZkPin)
                 .salary(safeSalary)
                 .build();
 
@@ -74,9 +77,11 @@ public class UserService {
         String safeName = sanitizeName(request.getName(), "name");
         String safeLastName = sanitizeName(request.getLastName(), "lastName");
         String safeCc = xssSanitizer.sanitizeCc(request.getCc());
+        String safeZkPin = sanitizeZkPin(request.getZkPin());
         double safeSalary = resolveSalary(request.getSalary());
 
         validateUserFields(safeName, safeLastName, safeCc);
+        validateZkPin(safeZkPin);
         validateSalary(safeSalary);
 
         log.info("Actualizando usuario con ID: {}", id);
@@ -86,6 +91,7 @@ public class UserService {
                 .name(safeName)
                 .lastName(safeLastName)
                 .cc(safeCc)
+                .zkPin(safeZkPin)
                 .salary(safeSalary)
                 .build();
 
@@ -180,6 +186,25 @@ public class UserService {
             throw new IllegalArgumentException("El campo '" + field + "' es requerido.");
         }
         return xssSanitizer.sanitizeAlphanumeric(value);
+    }
+
+    private String sanitizeZkPin(String value) {
+        if (value == null || value.isBlank()) {
+            return null;
+        }
+        return xssSanitizer.sanitizeAlphanumeric(value);
+    }
+
+    private void validateZkPin(String zkPin) {
+        if (zkPin == null || zkPin.isBlank()) {
+            return;
+        }
+        if (!zkPin.matches("^[0-9]+$")) {
+            throw new IllegalArgumentException("El PIN del huellero debe contener solo dígitos.");
+        }
+        if (zkPin.length() > 20) {
+            throw new IllegalArgumentException("El PIN del huellero no puede exceder 20 dígitos.");
+        }
     }
 
     private void validateUserFields(String name, String lastName, String cc) {

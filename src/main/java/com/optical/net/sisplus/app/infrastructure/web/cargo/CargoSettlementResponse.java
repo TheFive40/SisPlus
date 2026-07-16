@@ -17,6 +17,7 @@ public class CargoSettlementResponse {
     private Double cash;
     private Double qr;
     private Double security;
+    private Double expense;
     private Double total;
     private LocalDateTime settlementDate;
 }

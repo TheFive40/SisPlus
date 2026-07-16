@@ -97,13 +97,18 @@ public class AuthController {
             authService.updateLastLogin(safeUsername);
             Admin admin = authService.findByUsername(safeUsername);
 
-            log.info("[AUTH] Login exitoso — usuario: {}, IP: {}", safeUsername, ip);
+            String redirectUrl = (admin.getRoles() != null && admin.getRoles().contains("ADMIN"))
+                    ? "/dashboard"
+                    : "/cargues";
+
+            log.info("[AUTH] Login exitoso — usuario: {}, IP: {}, roles: {}", safeUsername, ip, admin.getRoles());
 
             return ResponseEntity.ok(AuthResponse.builder()
                     .success(true)
                     .message("Login exitoso")
                     .username(admin.getUsername())
-                    .redirectUrl("/dashboard")
+                    .redirectUrl(redirectUrl)
+                    .roles(admin.getRoles())
                     .build());
 
         } catch (BadCredentialsException e) {
@@ -160,6 +165,7 @@ public class AuthController {
         return ResponseEntity.ok(AuthResponse.builder()
                 .success(true)
                 .username(admin.getUsername())
+                .roles(admin.getRoles())
                 .build());
     }
 

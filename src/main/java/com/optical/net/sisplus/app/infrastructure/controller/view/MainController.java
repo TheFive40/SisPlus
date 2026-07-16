@@ -20,7 +20,7 @@ public class MainController {
     public String assistance(){
         return "assistance";
     }
-    @GetMapping
+    @GetMapping(value = {"", "login"})
     public String login(){
         return "login";
     }

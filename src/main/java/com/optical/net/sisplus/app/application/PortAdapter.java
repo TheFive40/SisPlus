@@ -14,6 +14,8 @@ public interface PortAdapter {
 
     UserDomain findUserById(Long usuarioId);
 
+    UserDomain findUserByZkPin(String zkPin);
+
     List<UserDomain> getAllUsers();
 
     void deleteUser(Long id);

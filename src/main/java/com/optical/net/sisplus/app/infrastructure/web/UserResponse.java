@@ -12,6 +12,7 @@ public class UserResponse {
     private String name;
     private String lastName;
     private String cc;
+    private String zkPin;
     private double salary;
 
     private double regularHours;

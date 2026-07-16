@@ -39,6 +39,23 @@ function getBogotaStartOfMonth() {
     return getBogotaDateString(bogota);
 }
 
+/* ── Number formatting helpers ── */
+function formatNumberInput(input) {
+    const raw = input.value.replace(/\D/g, '');
+    if (!raw) {
+        input.value = '';
+        return;
+    }
+    input.value = new Intl.NumberFormat('es-CO').format(parseInt(raw, 10));
+}
+
+function parseFormattedNumber(value) {
+    if (!value) return 0;
+    const clean = String(value).replace(/\./g, '').replace(/,/g, '.');
+    const num = parseFloat(clean);
+    return isNaN(num) ? 0 : num;
+}
+
 /* ── Icons ── */
 const Icons = {
     truck: `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 11h3l4 4v1a1 1 0 0 1-1 1h-1"/><circle cx="6" cy="17" r="2"/><circle cx="18" cy="17" r="2"/></svg>`,
@@ -62,7 +79,14 @@ async function api(url, options = {}) {
         let msg = `Error ${res.status}`;
         try {
             const txt = await res.text();
-            msg = txt || msg;
+            if (txt) {
+                try {
+                    const json = JSON.parse(txt);
+                    msg = json.message || json.error || txt;
+                } catch {
+                    msg = txt;
+                }
+            }
         } catch {}
         throw new Error(msg);
     }
@@ -89,8 +113,10 @@ const API = {
     markPending: id => api(`/api/cargos/${id}/pending`, { method: 'POST' }),
 
     saveSettlement: data => api('/api/cargos/settlements', { method: 'POST', body: JSON.stringify(data) }),
+    saveBulkSettlement: data => api('/api/cargos/settlements/bulk', { method: 'POST', body: JSON.stringify(data) }),
 
     getReport: date => api(`/api/cargos/report?date=${date}`),
+    sendReport: date => api(`/api/cargos/report/send?date=${date}`, { method: 'POST' }),
 
     getExpenses: params => api(`/api/cargos/expenses?${params}`),
     getExpenseSummary: params => api(`/api/cargos/expenses/summary?${params}`),
@@ -170,6 +196,8 @@ async function loadAll() {
         renderFleet();
         renderStats();
         populateExpenseFilterSelects();
+        populateDriverSelect('vehicleDriver');
+        populateDriverSelect('expenseDriver');
         await Promise.all([loadExpenses(), loadExpensePeriodSummary()]);
     } catch (err) {
         showAlert(err.message || 'Error cargando datos', 'error');
@@ -326,71 +354,44 @@ function actionRegisterSettlement() {
     const s = load.settlement || {};
     App.currentSettlementMerchandise = load.merchandiseValue || 0;
     document.getElementById('settlementLoadId').value = load.id;
-    document.getElementById('setDelivered').value = s.deliveredValue || '';
-    document.getElementById('setReturned').value = s.returnedValue || '';
-    document.getElementById('setCash').value = s.cash || '';
-    document.getElementById('setCoins').value = s.coins || '';
-    document.getElementById('setQr').value = s.qr || '';
-    document.getElementById('setSecurity').value = s.security || '';
+    document.getElementById('setCash').value = s.cash ? new Intl.NumberFormat('es-CO').format(Math.round(s.cash)) : '';
+    document.getElementById('setCoins').value = s.coins ? new Intl.NumberFormat('es-CO').format(Math.round(s.coins)) : '';
+    document.getElementById('setQr').value = s.qr ? new Intl.NumberFormat('es-CO').format(Math.round(s.qr)) : '';
+    document.getElementById('setReturned').value = s.returnedValue ? new Intl.NumberFormat('es-CO').format(Math.round(s.returnedValue)) : '';
+    document.getElementById('setSecurity').value = s.security ? new Intl.NumberFormat('es-CO').format(Math.round(s.security)) : '';
     document.getElementById('settlementVehiclePreview').innerHTML = vehiclePreviewHtml(load.vehicle);
 
-    ['setDelivered', 'setReturned', 'setCash', 'setCoins', 'setQr', 'setSecurity']
-        .forEach(id => document.getElementById(id).addEventListener('input', validateSettlement));
-
-    validateSettlement();
+    updateSettlementCalculation();
     openModal('modalSettlement');
 }
 
-function validateSettlement() {
+function updateSettlementCalculation() {
     const merchandise = App.currentSettlementMerchandise || 0;
-    const fields = ['setDelivered', 'setReturned', 'setCash', 'setCoins', 'setQr', 'setSecurity'];
+    const cash = parseFormattedNumber(document.getElementById('setCash').value);
+    const coins = parseFormattedNumber(document.getElementById('setCoins').value);
+    const qr = parseFormattedNumber(document.getElementById('setQr').value);
+    const returned = parseFormattedNumber(document.getElementById('setReturned').value);
 
-    const values = {};
-    let sum = 0;
-    fields.forEach(id => {
-        const val = parseFloat(document.getElementById(id).value);
-        values[id] = isNaN(val) ? 0 : val;
-        sum += values[id];
-    });
-
-    // Dynamic max per input: each field can only receive what is left from the others
-    fields.forEach(id => {
-        const otherSum = sum - values[id];
-        const maxAllowed = Math.max(0, merchandise - otherSum);
-        const input = document.getElementById(id);
-        input.max = maxAllowed;
-        if (values[id] > maxAllowed) {
-            input.value = maxAllowed;
-            values[id] = maxAllowed;
-        }
-    });
-
-    // Recalculate sum after clamping
-    sum = Object.values(values).reduce((a, b) => a + b, 0);
+    const delivered = cash + coins + qr;
+    document.getElementById('setDelivered').value = new Intl.NumberFormat('es-CO').format(delivered);
 
     const validationEl = document.getElementById('settlementValidation');
     const submitBtn = document.getElementById('settlementSubmitBtn');
-    const diff = merchandise - sum;
+    const total = delivered + returned;
 
-    if (sum > merchandise) {
+    if (Math.abs(total - merchandise) > 0.01) {
+        const diff = merchandise - total;
         validationEl.innerHTML = `
-            <div class="settlement-validation-error">
-                <strong>Excede el valor de la mercancía</strong><br>
-                Mercancía: ${fmt.money(merchandise)} · Registrado: ${fmt.money(sum)} · Exceso: ${fmt.money(sum - merchandise)}
+            <div class="settlement-validation-info">
+                Mercancía: ${fmt.money(merchandise)} · Entregado: ${fmt.money(delivered)} · Devolución: ${fmt.money(returned)} ·
+                ${diff > 0 ? `Faltante: ${fmt.money(diff)}` : `Exceso: ${fmt.money(Math.abs(diff))}`}
             </div>`;
         submitBtn.disabled = true;
         submitBtn.classList.add('btn-disabled');
-    } else if (diff > 0) {
-        validationEl.innerHTML = `
-            <div class="settlement-validation-info">
-                Mercancía: ${fmt.money(merchandise)} · Registrado: ${fmt.money(sum)} · Faltante: ${fmt.money(diff)}
-            </div>`;
-        submitBtn.disabled = false;
-        submitBtn.classList.remove('btn-disabled');
     } else {
         validationEl.innerHTML = `
             <div class="settlement-validation-success">
-                Cuadra perfectamente con la mercancía: ${fmt.money(merchandise)}
+                Cuadra perfectamente: Entregado ${fmt.money(delivered)} + Devolución ${fmt.money(returned)} = Mercancía ${fmt.money(merchandise)}
             </div>`;
         submitBtn.disabled = false;
         submitBtn.classList.remove('btn-disabled');
@@ -401,35 +402,129 @@ function closeSettlementModal() { closeModal('modalSettlement'); }
 
 async function saveSettlement(e) {
     e.preventDefault();
-    const merchandise = App.currentSettlementMerchandise || 0;
     const data = {
         cargoLoadId: parseInt(document.getElementById('settlementLoadId').value, 10),
-        deliveredValue: parseFloat(document.getElementById('setDelivered').value) || 0,
-        returnedValue: parseFloat(document.getElementById('setReturned').value) || 0,
-        cash: parseFloat(document.getElementById('setCash').value) || 0,
-        coins: parseFloat(document.getElementById('setCoins').value) || 0,
-        qr: parseFloat(document.getElementById('setQr').value) || 0,
-        security: parseFloat(document.getElementById('setSecurity').value) || 0
+        deliveredValue: parseFormattedNumber(document.getElementById('setDelivered').value),
+        returnedValue: parseFormattedNumber(document.getElementById('setReturned').value),
+        cash: parseFormattedNumber(document.getElementById('setCash').value),
+        coins: parseFormattedNumber(document.getElementById('setCoins').value),
+        qr: parseFormattedNumber(document.getElementById('setQr').value),
+        security: parseFormattedNumber(document.getElementById('setSecurity').value),
+        expense: parseFormattedNumber(document.getElementById('setExpense').value)
     };
 
-    const sum = Object.values(data).reduce((total, val) => total + (typeof val === 'number' ? val : 0), 0) - data.cargoLoadId;
-    if (sum > merchandise) {
-        showAlert(`La suma registrada (${fmt.money(sum)}) no puede superar la mercancía (${fmt.money(merchandise)})`, 'error');
+    const merchandise = App.currentSettlementMerchandise || 0;
+    const total = data.deliveredValue + data.returnedValue;
+
+    if (Math.abs(total - merchandise) > 0.01) {
+        showAlert(`Entregado (${fmt.money(data.deliveredValue)}) + Devolución (${fmt.money(data.returnedValue)}) debe ser igual a la mercancía (${fmt.money(merchandise)})`, 'error');
         return;
     }
 
-    const hasAnyValue = Object.entries(data).some(([key, val]) => key !== 'cargoLoadId' && val > 0);
-    if (!hasAnyValue) {
-        showAlert('Registra al menos un valor para guardar el cierre', 'error');
+    if (data.deliveredValue <= 0) {
+        showAlert('El valor entregado debe ser mayor a 0', 'error');
         return;
     }
 
     try {
         await API.saveSettlement(data);
-        // Auto mark delivered when closing
         await API.markDelivered(data.cargoLoadId);
         showAlert('Cierre de jornada guardado');
         closeSettlementModal();
+        await loadAll();
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
+/* ── Bulk Settlement Modal ── */
+function openBulkSettlementModal() {
+    const pendingLoads = App.loads.filter(l => !l.settlement && l.status !== 'ENTREGADO');
+    if (pendingLoads.length === 0) {
+        showAlert('No hay carros pendientes por cerrar', 'info');
+        return;
+    }
+    const totalMerchandise = pendingLoads.reduce((sum, l) => sum + (l.merchandiseValue || 0), 0);
+    App.bulkSettlementLoads = pendingLoads;
+    App.bulkSettlementMerchandise = totalMerchandise;
+
+    document.getElementById('bulkCash').value = '';
+    document.getElementById('bulkCoins').value = '';
+    document.getElementById('bulkQr').value = '';
+    document.getElementById('bulkReturned').value = '';
+    document.getElementById('bulkSecurity').value = '';
+    document.getElementById('bulkExpense').value = '';
+    document.getElementById('bulkDelivered').value = new Intl.NumberFormat('es-CO').format(0);
+    document.getElementById('bulkSettlementInfo').innerHTML = `
+        Carros pendientes: <strong>${pendingLoads.length}</strong> ·
+        Mercancía total: <strong>${fmt.money(totalMerchandise)}</strong>
+    `;
+    updateBulkSettlementCalculation();
+    openModal('modalBulkSettlement');
+}
+
+function closeBulkSettlementModal() { closeModal('modalBulkSettlement'); }
+
+function updateBulkSettlementCalculation() {
+    const merchandise = App.bulkSettlementMerchandise || 0;
+    const cash = parseFormattedNumber(document.getElementById('bulkCash').value);
+    const coins = parseFormattedNumber(document.getElementById('bulkCoins').value);
+    const qr = parseFormattedNumber(document.getElementById('bulkQr').value);
+    const returned = parseFormattedNumber(document.getElementById('bulkReturned').value);
+
+    const delivered = cash + coins + qr;
+    document.getElementById('bulkDelivered').value = new Intl.NumberFormat('es-CO').format(delivered);
+
+    const validationEl = document.getElementById('bulkSettlementValidation');
+    const submitBtn = document.getElementById('bulkSettlementSubmitBtn');
+    const total = delivered + returned;
+
+    if (Math.abs(total - merchandise) > 0.01) {
+        const diff = merchandise - total;
+        validationEl.innerHTML = `
+            <div class="settlement-validation-info">
+                Mercancía total: ${fmt.money(merchandise)} · Entregado: ${fmt.money(delivered)} · Devolución: ${fmt.money(returned)} ·
+                ${diff > 0 ? `Faltante: ${fmt.money(diff)}` : `Exceso: ${fmt.money(Math.abs(diff))}`}
+            </div>`;
+        submitBtn.disabled = true;
+        submitBtn.classList.add('btn-disabled');
+    } else {
+        validationEl.innerHTML = `
+            <div class="settlement-validation-success">
+                Cuadra perfectamente: ${fmt.money(delivered)} + ${fmt.money(returned)} = ${fmt.money(merchandise)}
+            </div>`;
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('btn-disabled');
+    }
+}
+
+async function saveBulkSettlement(e) {
+    e.preventDefault();
+    const data = {
+        date: App.currentDate,
+        cash: parseFormattedNumber(document.getElementById('bulkCash').value),
+        coins: parseFormattedNumber(document.getElementById('bulkCoins').value),
+        qr: parseFormattedNumber(document.getElementById('bulkQr').value),
+        returnedValue: parseFormattedNumber(document.getElementById('bulkReturned').value),
+        security: parseFormattedNumber(document.getElementById('bulkSecurity').value),
+        expense: parseFormattedNumber(document.getElementById('bulkExpense').value)
+    };
+
+    const merchandise = App.bulkSettlementMerchandise || 0;
+    const delivered = data.cash + data.coins + data.qr;
+    if (Math.abs((delivered + data.returnedValue) - merchandise) > 0.01) {
+        showAlert('Los totales no cuadran con la mercancía total', 'error');
+        return;
+    }
+    if (delivered <= 0) {
+        showAlert('Registra al menos un valor de pago', 'error');
+        return;
+    }
+
+    try {
+        await API.saveBulkSettlement(data);
+        showAlert('Cierre masivo guardado');
+        closeBulkSettlementModal();
         await loadAll();
     } catch (err) {
         showAlert(err.message, 'error');
@@ -468,6 +563,25 @@ async function saveAssignDriver() {
 function actionEditVehicle() {
     closeVehicleActionsModal();
     openVehicleModal(App.selectedVehicle);
+}
+
+function actionDeleteLoad() {
+    closeVehicleActionsModal();
+    if (!App.selectedLoad) {
+        showAlert('No hay cargue seleccionado', 'error');
+        return;
+    }
+    const load = App.selectedLoad;
+    const vehicleName = load.vehicle ? load.vehicle.name : 'Este carro';
+    openConfirm(`¿Eliminar el cargue de <b>${escapeHtml(vehicleName)}</b> del ${fmt.date(load.loadDate)}? Esta acción no se puede deshacer.`, async () => {
+        try {
+            await API.deleteLoad(load.id);
+            showAlert('Cargue eliminado');
+            await loadAll();
+        } catch (err) {
+            showAlert(err.message, 'error');
+        }
+    });
 }
 
 function openVehicleModal(vehicle = null) {
@@ -516,15 +630,70 @@ function confirmDeleteVehicle(id, name) {
     });
 }
 
-/* ── Driver Modal ── */
-function openDriverModal(driver = null) {
-    document.getElementById('driverId').value = driver ? driver.id : '';
-    document.getElementById('driverName').value = driver ? driver.name : '';
-    document.getElementById('driverPhone').value = driver ? driver.phone : '';
-    openModal('modalDriver');
+/* ── Drivers Management Modal ── */
+async function openDriversModal() {
+    resetDriverForm();
+    openModal('modalDrivers');
+    try {
+        App.drivers = await API.getDrivers();
+        renderDriversList();
+        populateDriverSelect('vehicleDriver');
+        populateDriverSelect('expenseDriver');
+    } catch (err) {
+        showAlert(err.message || 'Error cargando conductores', 'error');
+    }
 }
 
-function closeDriverModal() { closeModal('modalDriver'); }
+function closeDriversModal() { closeModal('modalDrivers'); }
+
+function resetDriverForm() {
+    document.getElementById('driverFormTitle').textContent = 'Nuevo conductor';
+    document.getElementById('driverId').value = '';
+    document.getElementById('driverName').value = '';
+    document.getElementById('driverPhone').value = '';
+}
+
+function editDriver(driver) {
+    document.getElementById('driverFormTitle').textContent = 'Editar conductor';
+    document.getElementById('driverId').value = driver.id;
+    document.getElementById('driverName').value = driver.name || '';
+    document.getElementById('driverPhone').value = driver.phone || '';
+}
+
+function confirmDeleteDriver(id, name) {
+    openConfirm(`¿Eliminar al conductor <b>${escapeHtml(name)}</b>? Si tiene carros asignados, se desactivará para conservar el historial.`, async () => {
+        try {
+            const res = await API.deleteDriver(id);
+            showAlert(res?.message || 'Conductor eliminado');
+            App.drivers = await API.getDrivers();
+            renderDriversList();
+            populateDriverSelect('vehicleDriver');
+            populateDriverSelect('expenseDriver');
+        } catch (err) {
+            showAlert(err.message, 'error');
+        }
+    });
+}
+
+function renderDriversList() {
+    const list = document.getElementById('driversList');
+    if (!App.drivers || App.drivers.length === 0) {
+        list.innerHTML = '<div class="categories-empty">No hay conductores registrados</div>';
+        return;
+    }
+    list.innerHTML = App.drivers.map(d => `
+        <div class="category-item">
+            <div class="category-info">
+                <div class="category-name">${escapeHtml(d.name)} ${d.phone ? `<span class="category-meta">— ${escapeHtml(d.phone)}</span>` : ''}</div>
+                ${!d.active ? '<span class="category-meta">Desactivado</span>' : ''}
+            </div>
+            <div class="category-actions">
+                <button type="button" class="icon-btn" onclick='editDriver(${JSON.stringify(d)})' title="Editar">${Icons.edit}</button>
+                <button type="button" class="icon-btn danger" onclick="confirmDeleteDriver(${d.id}, '${escapeHtml(d.name).replace(/'/g, "\\'")}')" title="Eliminar">${Icons.trash}</button>
+            </div>
+        </div>
+    `).join('');
+}
 
 async function saveDriver(e) {
     e.preventDefault();
@@ -542,9 +711,11 @@ async function saveDriver(e) {
         if (id) await API.updateDriver(parseInt(id, 10), data);
         else await API.createDriver(data);
         showAlert(id ? 'Conductor actualizado' : 'Conductor creado');
-        closeDriverModal();
+        resetDriverForm();
         App.drivers = await API.getDrivers();
+        renderDriversList();
         populateDriverSelect('vehicleDriver');
+        populateDriverSelect('expenseDriver');
     } catch (err) {
         showAlert(err.message, 'error');
     }
@@ -591,6 +762,15 @@ function confirmDeleteAction() {
 }
 
 /* ── Report ── */
+async function sendReportManually() {
+    try {
+        const res = await API.sendReport(App.currentDate);
+        showAlert(res?.message || 'Reporte enviado');
+    } catch (err) {
+        showAlert(err.message, 'error');
+    }
+}
+
 async function generateReport() {
     try {
         const report = await API.getReport(App.currentDate);
@@ -619,7 +799,8 @@ async function generateReport() {
             <div class="report-item"><div class="report-label">Monedas</div><div class="report-value">${fmt.money(report.totalCoins)}</div></div>
             <div class="report-item"><div class="report-label">QR</div><div class="report-value">${fmt.money(report.totalQr)}</div></div>
             <div class="report-item"><div class="report-label">Seguridad</div><div class="report-value">${fmt.money(report.totalSecurity)}</div></div>
-            <div class="report-item"><div class="report-label">Total gastos</div><div class="report-value">${fmt.money(report.totalExpenses)}</div></div>
+            <div class="report-item"><div class="report-label">Gastos de los carros</div><div class="report-value">${fmt.money(report.totalExpense)}</div></div>
+            <div class="report-item"><div class="report-label">Total gastos empresa</div><div class="report-value">${fmt.money(report.totalExpenses)}</div></div>
             ${expensesByCategoryHtml}
             <div class="report-item" style="grid-column:1/-1"><div class="report-label">Gran total</div><div class="report-value total">${fmt.money(report.grandTotal)}</div></div>
         `;

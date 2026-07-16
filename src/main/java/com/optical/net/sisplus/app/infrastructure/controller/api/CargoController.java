@@ -2,6 +2,7 @@ package com.optical.net.sisplus.app.infrastructure.controller.api;
 
 import com.optical.net.sisplus.app.infrastructure.service.CargoService;
 import com.optical.net.sisplus.app.infrastructure.service.CompanyExpenseService;
+import com.optical.net.sisplus.app.infrastructure.service.EmailService;
 import com.optical.net.sisplus.app.infrastructure.web.cargo.*;
 import org.springframework.core.io.Resource;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -18,10 +19,12 @@ public class CargoController {
 
     private final CargoService cargoService;
     private final CompanyExpenseService expenseService;
+    private final EmailService emailService;
 
-    public CargoController(CargoService cargoService, CompanyExpenseService expenseService) {
+    public CargoController(CargoService cargoService, CompanyExpenseService expenseService, EmailService emailService) {
         this.cargoService = cargoService;
         this.expenseService = expenseService;
+        this.emailService = emailService;
     }
 
     /* ── Drivers ── */
@@ -106,12 +109,26 @@ public class CargoController {
         return cargoService.createOrUpdateSettlement(request);
     }
 
+    @PostMapping("/settlements/bulk")
+    public List<CargoLoadResponse> createBulkSettlement(@RequestBody BulkSettlementRequest request) {
+        return cargoService.createBulkSettlement(request);
+    }
+
     /* ── Report ── */
     @GetMapping("/report")
     public CargoReportResponse getReport(
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
     ) {
         return cargoService.getReportByDate(date);
+    }
+
+    @PostMapping("/report/send")
+    public ResponseEntity<MessageResponse> sendReport(
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        CargoReportResponse report = cargoService.getReportByDate(date);
+        emailService.sendSettlementReport(report);
+        return ResponseEntity.ok(new MessageResponse("Reporte enviado al correo configurado"));
     }
 
     /* ── Company Expenses ── */

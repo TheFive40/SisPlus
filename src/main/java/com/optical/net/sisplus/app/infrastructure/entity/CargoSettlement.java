@@ -28,6 +28,7 @@ public class CargoSettlement {
     private Double cash;
     private Double qr;
     private Double security;
+    private Double expense;
     private Double total;
 
     private LocalDateTime settlementDate;
@@ -35,11 +36,10 @@ public class CargoSettlement {
     @PrePersist
     @PreUpdate
     public void calculateTotal() {
-        this.total = zeroIfNull(cash)
-                + zeroIfNull(coins)
-                + zeroIfNull(qr)
-                - zeroIfNull(security)
-                - zeroIfNull(returnedValue);
+        // El entregado es la suma de efectivo, monedas y QR
+        this.deliveredValue = zeroIfNull(cash) + zeroIfNull(coins) + zeroIfNull(qr);
+        // El total del cierre considera seguridad y gasto como descuentos
+        this.total = this.deliveredValue - zeroIfNull(security) - zeroIfNull(expense) - zeroIfNull(returnedValue);
         if (this.settlementDate == null) {
             this.settlementDate = LocalDateTime.now();
         }

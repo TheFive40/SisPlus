@@ -70,10 +70,11 @@ public class SecurityConfig {
                                 "/iclock/**",
                                 "/css/**", "/js/**", "/images/**", "/favicon.ico"
                         ).permitAll()
+                        .requestMatchers("/api/auth/me").authenticated()
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
-                        .requestMatchers("/api/zk/**").hasRole("ADMIN")  // ← agrega esto
-
-                        .anyRequest().authenticated()
+                        .requestMatchers("/api/zk/**").hasRole("ADMIN")
+                        .requestMatchers("/cargues", "/api/cargos/**").hasAnyRole("ADMIN", "CARGUES")
+                        .anyRequest().hasRole("ADMIN")
                 )
 
                 .sessionManagement(session -> session

@@ -93,6 +93,15 @@ body {
 .nav-item:hover { background: var(--gray-100); color: var(--gray-700); }
 .nav-item.active { background: rgba(30,58,138,.07); color: var(--navy); font-weight: 500; }
 .nav-item svg { width: 15px; height: 15px; flex-shrink: 0; }
+.nav-item.nav-item-btn {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
 .nav-divider { height: 0.5px; background: var(--gray-200); margin: 8px 12px; }
 
 /* ── Main ── */
@@ -218,6 +227,7 @@ body {
     padding: 3px 9px; border-radius: 20px; font-size: 10px; font-weight: 500;
 }
 .badge-admin  { background: rgba(30,58,138,.1); color: var(--navy); }
+.badge-cargues { background: rgba(217,119,6,.1); color: #B45309; }
 .badge-active { background: rgba(13,148,136,.1); color: #0D9488; }
 
 .action-btns { display: flex; align-items: center; gap: 6px; }

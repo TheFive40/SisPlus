@@ -1,6 +1,8 @@
 package com.optical.net.sisplus.app.infrastructure.controller.api;
 
 import com.optical.net.sisplus.app.infrastructure.entity.ZkDevice;
+import com.optical.net.sisplus.app.application.PortAdapter;
+import com.optical.net.sisplus.app.domain.UserDomain;
 import com.optical.net.sisplus.app.infrastructure.service.ZkDeviceService;
 import com.optical.net.sisplus.app.infrastructure.service.UserService;
 import com.optical.net.sisplus.app.infrastructure.zkteco.ZkTecoConstants;
@@ -23,6 +25,8 @@ public class ZkTecoAdmsController {
 
     private final UserService userService;
     private final ZkDeviceService deviceService;
+    private final PortAdapter portAdapter;
+
     private static final java.util.Map<Integer, String> VERIFY_METHODS = java.util.Map.ofEntries(
             java.util.Map.entry(0,  "Contraseña"),
             java.util.Map.entry(1,  "Huella dactilar"),
@@ -194,16 +198,16 @@ public class ZkTecoAdmsController {
                 logAttendanceEvent(pin, timestamp, status, verify, sn);
                 // ─────────────────────────────────────────────────
 
-                Long userId = parsePinToUserId(pin);
-                if (userId == null) {
+                UserDomain user = findUserByZkPin(pin);
+                if (user == null) {
                     log.warn("[ZKTeco] PIN={} no encontrado en la base de datos", pin);
                     continue;
                 }
 
                 switch (status) {
-                    case ZkTecoConstants.ATT_STATUS_CHECK_IN  -> userService.registerEntry(userId);
-                    case ZkTecoConstants.ATT_STATUS_CHECK_OUT -> userService.registerExit(userId);
-                    case ZkTecoConstants.ATT_STATUS_AUTO      -> userService.registerEntry(userId);
+                    case ZkTecoConstants.ATT_STATUS_CHECK_IN  -> userService.registerEntry(user.getId());
+                    case ZkTecoConstants.ATT_STATUS_CHECK_OUT -> userService.registerExit(user.getId());
+                    case ZkTecoConstants.ATT_STATUS_AUTO      -> userService.registerEntry(user.getId());
                     default -> log.debug("[ZKTeco] Status {} no manejado para PIN={}", status, pin);
                 }
 
@@ -307,11 +311,11 @@ public class ZkTecoAdmsController {
     //  Helpers
     // =========================================================
 
-    private Long parsePinToUserId(String pin) {
+    private UserDomain findUserByZkPin(String pin) {
         try {
-            return Long.parseLong(pin.trim());
-        } catch (NumberFormatException e) {
-            log.warn("[ZKTeco] PIN no numérico: {}", pin);
+            return portAdapter.findUserByZkPin(pin.trim());
+        } catch (Exception e) {
+            log.warn("[ZKTeco] PIN={} no encontrado: {}", pin, e.getMessage());
             return null;
         }
     }

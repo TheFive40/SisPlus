@@ -52,8 +52,8 @@ async function loadAdmins() {
         document.getElementById('stateLoading').classList.add('hidden');
         document.getElementById('tableSection').classList.remove('hidden');
     } catch {
-        document.getElementById('stateLoading').textContent = 'Error al cargar administradores.';
-        showAlert('Error al cargar los administradores. Recarga la página.', 'error');
+        document.getElementById('stateLoading').textContent = 'Error al cargar usuarios.';
+        showAlert('Error al cargar los usuarios. Recarga la página.', 'error');
     }
 }
 
@@ -85,6 +85,10 @@ function renderTable() {
 
     tbody.innerHTML = slice.map(adm => {
         const letters = getLetters(adm.username);
+        const isAdmin = adm.roles && adm.roles.includes('ADMIN');
+        const roleBadge = isAdmin
+            ? '<span class="badge badge-admin">Administrador</span>'
+            : '<span class="badge badge-cargues">Gestión de Cargues</span>';
         return `
         <tr>
           <td>
@@ -93,7 +97,7 @@ function renderTable() {
               <span class="adm-username">${adm.username}</span>
             </div>
           </td>
-          <td><span class="badge badge-admin">Administrador</span></td>
+          <td>${roleBadge}</td>
           <td><span class="badge badge-active">Activo</span></td>
           <td>
             <div class="action-btns">
@@ -113,7 +117,7 @@ function renderPagination() {
     const start    = total ? (currentPage - 1) * PER_PAGE + 1 : 0;
     const end      = Math.min(currentPage * PER_PAGE, total);
 
-    document.getElementById('paginInfo').textContent = `Mostrando ${start}–${end} de ${total} administradores`;
+    document.getElementById('paginInfo').textContent = `Mostrando ${start}–${end} de ${total} usuarios`;
 
     let pages = [];
     for (let i = 1; i <= totalPgs; i++) {
@@ -178,6 +182,7 @@ async function createAdmin(e) {
     const username = document.getElementById('cUsername').value.trim();
     const password = document.getElementById('cPassword').value;
     const confirm  = document.getElementById('cConfirm').value;
+    const role     = document.getElementById('cRole').value;
 
     if (password !== confirm) {
         showAlert('Las contraseñas no coinciden.', 'error', 'createAlert'); return;
@@ -190,14 +195,17 @@ async function createAdmin(e) {
         const res = await fetch(API_BASE, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ username, password })
+            body: JSON.stringify({ username, password, roles: [role] })
         });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const errText = await res.text().catch(() => 'Error del servidor');
+            throw new Error(errText || 'Error al registrar');
+        }
         closeCreateModal();
-        showAlert('Administrador registrado exitosamente');
+        showAlert('Usuario registrado exitosamente');
         loadAdmins();
-    } catch {
-        showAlert('Error al registrar. El nombre de usuario puede estar en uso.', 'error', 'createAlert');
+    } catch (e) {
+        showAlert(e.message || 'Error al registrar. El nombre de usuario puede estar en uso.', 'error', 'createAlert');
     }
 }
 
@@ -214,12 +222,15 @@ async function deleteAdmin() {
     if (!pendingDelete) return;
     try {
         const res = await fetch(`${API_BASE}/${encodeURIComponent(pendingDelete)}`, { method: 'DELETE' });
-        if (!res.ok) throw new Error();
+        if (!res.ok) {
+            const errText = await res.text().catch(() => 'Error del servidor');
+            throw new Error(errText || 'Error al eliminar');
+        }
         closeDeleteModal();
-        showAlert('Administrador eliminado exitosamente');
+        showAlert('Usuario eliminado exitosamente');
         loadAdmins();
-    } catch {
-        showAlert('Error al eliminar el administrador.', 'error');
+    } catch (e) {
+        showAlert(e.message || 'Error al eliminar el usuario.', 'error');
         closeDeleteModal();
     }
 }

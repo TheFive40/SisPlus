@@ -11,4 +11,6 @@ public interface VehicleRepository extends JpaRepository<Vehicle, Long> {
     List<Vehicle> findByActiveTrueOrderByNameAsc();
 
     long countByDriverId(Long driverId);
+
+    java.util.Optional<Vehicle> findByPlateIgnoreCase(String plate);
 }

@@ -106,6 +106,15 @@ public class PortCaseAdapter implements PortAdapter {
     }
 
     @Override
+    @Transactional(readOnly = true)
+    public UserDomain findUserByZkPin(String zkPin) {
+        log.debug("Buscando usuario por PIN de huellero: {}", zkPin);
+        var user = userRepository.findByZkPin(zkPin)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado con PIN de huellero: " + zkPin));
+        return userMapper.toDomain(user);
+    }
+
+    @Override
     @Cacheable(value = "users")
     @Transactional(readOnly = true)
     public List<UserDomain> getAllUsers() {

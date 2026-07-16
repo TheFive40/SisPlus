@@ -28,6 +28,11 @@ public class AdminService {
         if (adminDomain.getPassword() != null && !adminDomain.getPassword().isEmpty()) {
             adminDomain.setPassword(passwordEncoder.encode(adminDomain.getPassword()));
         }
+        if (adminDomain.getRoles() == null || adminDomain.getRoles().isEmpty()) {
+            Set<String> defaultRoles = new HashSet<>();
+            defaultRoles.add("ADMIN");
+            adminDomain.setRoles(defaultRoles);
+        }
         return portCaseAdapter.save(adminDomain);
     }
 
@@ -62,6 +67,31 @@ public class AdminService {
 
     public List<AdminDomain> findAllAdmins() {
         return portCaseAdapter.findAllAdmins();
+    }
+
+    @Transactional
+    public boolean assignRole(String username, String role) {
+        Admin admin = adminRepository.findByUsername(username);
+        if (admin == null) {
+            return false;
+        }
+        if (admin.getRoles() == null) {
+            admin.setRoles(new HashSet<>());
+        }
+        admin.getRoles().add(role.toUpperCase());
+        adminRepository.save(admin);
+        return true;
+    }
+
+    @Transactional
+    public boolean removeRole(String username, String role) {
+        Admin admin = adminRepository.findByUsername(username);
+        if (admin == null || admin.getRoles() == null) {
+            return false;
+        }
+        admin.getRoles().remove(role.toUpperCase());
+        adminRepository.save(admin);
+        return true;
     }
 
     public void createDefaultAdminIfNotExists() {

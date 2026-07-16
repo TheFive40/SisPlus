@@ -217,12 +217,25 @@ public class CompanyExpenseService {
     @Transactional
     public void deleteCategory(Long id) {
         ExpenseCategoryEntity category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Categoría no encontrada"));
-        boolean hasExpenses = expenseRepository.exists((root, query, cb) ->
-                cb.equal(root.join("category", JoinType.LEFT).get("id"), id));
-        if (hasExpenses) {
-            throw new RuntimeException("No se puede eliminar la categoría porque tiene gastos asociados");
+                .orElseThrow(() -> new IllegalArgumentException("Categoría no encontrada"));
+
+        long expenseCount = expenseRepository.countByCategoryId(id);
+        if (expenseCount > 0) {
+            ExpenseCategoryEntity fallback = categoryRepository.findAll().stream()
+                    .filter(c -> c.isActive() && !c.getId().equals(id))
+                    .findFirst()
+                    .orElseGet(() -> {
+                        ExpenseCategoryEntity cat = ExpenseCategoryEntity.builder()
+                                .name("Otros")
+                                .color("#64748B")
+                                .active(true)
+                                .build();
+                        return categoryRepository.save(cat);
+                    });
+
+            expenseRepository.reassignCategory(category, fallback);
         }
+
         categoryRepository.delete(category);
     }
 

@@ -40,4 +40,22 @@ public class AdminController {
         return ResponseEntity.ok("ok");
     }
 
+    @PostMapping("/{username}/roles")
+    public ResponseEntity<String> assignRole(
+            @PathVariable String username,
+            @RequestParam String role
+    ) {
+        boolean assigned = adminService.assignRole(username, role);
+        return assigned ? ResponseEntity.ok("Rol asignado") : ResponseEntity.badRequest().body("Usuario no encontrado");
+    }
+
+    @DeleteMapping("/{username}/roles")
+    public ResponseEntity<String> removeRole(
+            @PathVariable String username,
+            @RequestParam String role
+    ) {
+        boolean removed = adminService.removeRole(username, role);
+        return removed ? ResponseEntity.ok("Rol eliminado") : ResponseEntity.badRequest().body("Usuario no encontrado");
+    }
+
 }

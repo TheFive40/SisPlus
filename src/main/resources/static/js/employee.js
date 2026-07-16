@@ -116,6 +116,7 @@ function renderTable() {
             </div>
           </td>
           <td>${emp.cc}</td>
+          <td style="font-size:12px;color:var(--gray-500)">${emp.zkPin || '—'}</td>
           <td style="font-size:12px;color:var(--gray-700);font-weight:500">${formatCurrency(emp.salary || DEFAULT_SALARY)}</td>
           <td><span class="badge badge-active">Activo</span></td>
           <td>
@@ -194,6 +195,7 @@ async function createEmployee(e) {
         name:     document.getElementById('cName').value.trim(),
         lastName: document.getElementById('cLastName').value.trim(),
         cc:       document.getElementById('cCc').value.trim(),
+        zkPin:    document.getElementById('cZkPin').value.trim() || null,
         salary:   salary
     };
     try {
@@ -226,6 +228,7 @@ function openViewModal(id) {
     document.getElementById('vName').textContent           = emp.name;
     document.getElementById('vLastName').textContent       = emp.lastName;
     document.getElementById('vCc').textContent             = emp.cc;
+    document.getElementById('vZkPin').textContent          = emp.zkPin || 'No configurado';
     document.getElementById('vSalary').textContent         = formatCurrency(emp.salary || DEFAULT_SALARY);
     document.getElementById('modalView').classList.add('active');
 }
@@ -243,6 +246,7 @@ function openEditModal(id) {
     document.getElementById('eName').value     = emp.name;
     document.getElementById('eLastName').value = emp.lastName;
     document.getElementById('eCc').value       = emp.cc;
+    document.getElementById('eZkPin').value    = emp.zkPin || '';
     document.getElementById('eSalary').value   = emp.salary || DEFAULT_SALARY;
     document.getElementById('editAlert').innerHTML = '';
     document.getElementById('modalEdit').classList.add('active');
@@ -257,6 +261,7 @@ async function updateEmployee(e) {
         name:     document.getElementById('eName').value.trim(),
         lastName: document.getElementById('eLastName').value.trim(),
         cc:       document.getElementById('eCc').value.trim(),
+        zkPin:    document.getElementById('eZkPin').value.trim() || null,
         salary:   salary
     };
     try {

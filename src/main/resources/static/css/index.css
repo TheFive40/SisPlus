@@ -239,6 +239,16 @@ body {
     flex-shrink: 0;
 }
 
+.nav-item.nav-item-btn {
+    width: 100%;
+    background: transparent;
+    border: none;
+    text-align: left;
+    font: inherit;
+    color: inherit;
+    cursor: pointer;
+}
+
 .nav-divider {
     height: 0.5px;
     background: var(--gray-200);

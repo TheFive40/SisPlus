@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Administradores — SisPlus</title>
-    <link rel="stylesheet" href="/css/admin.css" th:href="@{/css/admin.css}">
-    <script src="/js/admin.js" th:src="@{/js/admin.js}" defer></script>
+    <title>Usuarios — SisPlus</title>
+    <link rel="stylesheet" href="/css/admin.css?v=3" th:href="@{/css/admin.css?v=3}">
+    <script src="/js/admin.js?v=3" th:src="@{/js/admin.js?v=3}" defer></script>
 </head>
 <body>
 
@@ -33,47 +33,8 @@
 </div>
 
 <!-- ── Sidebar ── -->
-<div class="sidebar" id="sidebar">
-    <div class="nav-section">
-        <div class="nav-section-label">Principal</div>
-        <a href="/dashboard" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
-            Dashboard
-        </a>
-        <a href="/employee" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
-            Empleados
-        </a>
-        <a href="/assistance" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-            Asistencias
-        </a>
-        <a href="/cargues" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 18 16 18 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>
-            Gestión de Cargues
-        </a>
-        <a href="/payroll" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
-            Nómina
-        </a>
-        <a href="/reports" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
-            Reportes
-        </a>
-    </div>
-    <div class="nav-divider"></div>
-    <div class="nav-section">
-        <div class="nav-section-label">Sistema</div>
-        <a href="/admin" class="nav-item active">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Administradores
-        </a>
-        <a href="/config" class="nav-item">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
-            Configuración
-        </a>
-    </div>
-</div>
+<!-- Sidebar -->
+<div th:replace="~{fragments/sidebar :: sidebar(activePage='admin')}"></div>
 
 <!-- ── Main ── -->
 <div class="main-content" id="mainContent">
@@ -81,18 +42,18 @@
 
         <div class="page-header">
             <div>
-                <h1 class="page-title">Administradores</h1>
+                <h1 class="page-title">Usuarios</h1>
                 <p class="page-subtitle">Usuarios con acceso al sistema</p>
             </div>
             <button class="btn btn-primary" onclick="openCreateModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                Nuevo administrador
+                Nuevo usuario
             </button>
         </div>
 
         <div class="info-banner">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            Los administradores tienen acceso completo al sistema. El nombre de usuario debe ser único y la contraseña debe contener al menos 6 caracteres.
+            Los usuarios tienen acceso según su rol. El nombre de usuario debe ser único y la contraseña debe contener al menos 6 caracteres.
         </div>
 
         <div id="alertContainer" class="alert-container"></div>
@@ -127,7 +88,7 @@
 
                 <div class="state-empty hidden" id="stateEmpty">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                    No se encontraron administradores
+                    No se encontraron usuarios
                 </div>
 
                 <div class="pagination">
@@ -160,11 +121,11 @@
     </div>
 </footer>
 
-<!-- ── Modal: Crear administrador ── -->
+<!-- ── Modal: Crear usuario ── -->
 <div class="modal-backdrop" id="modalCreate">
     <div class="modal">
         <div class="modal-head">
-            <span class="modal-title">Nuevo administrador</span>
+            <span class="modal-title">Nuevo usuario</span>
             <button class="modal-close" onclick="closeCreateModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -194,10 +155,17 @@
                         </button>
                     </div>
                 </div>
+                <div class="field-group">
+                    <label class="field-label" for="cRole">Rol *</label>
+                    <select id="cRole" class="field-input" required>
+                        <option value="ADMIN">Administrador</option>
+                        <option value="CARGUES">Gestión de Cargues</option>
+                    </select>
+                </div>
             </div>
             <div class="modal-foot">
                 <button type="button" class="btn btn-secondary" onclick="closeCreateModal()">Cancelar</button>
-                <button type="submit" class="btn btn-primary">Crear administrador</button>
+                <button type="submit" class="btn btn-primary">Crear usuario</button>
             </div>
         </form>
     </div>
@@ -207,7 +175,7 @@
 <div class="modal-backdrop" id="modalDelete">
     <div class="modal" style="max-width:400px">
         <div class="modal-head">
-            <span class="modal-title">Eliminar administrador</span>
+            <span class="modal-title">Eliminar usuario</span>
             <button class="modal-close" onclick="closeDeleteModal()">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
             </button>
@@ -219,7 +187,7 @@
                 </div>
                 <div>
                     <p style="font-size:13px;font-weight:500;color:var(--gray-800);margin-bottom:6px">¿Eliminar a <span id="deleteAdmName" style="color:var(--navy)"></span>?</p>
-                    <p style="font-size:12px;color:var(--gray-500);line-height:1.55">Esta acción no se puede deshacer. El administrador perderá el acceso al sistema de forma inmediata.</p>
+                    <p style="font-size:12px;color:var(--gray-500);line-height:1.55">Esta acción no se puede deshacer. El usuario perderá el acceso al sistema de forma inmediata.</p>
                 </div>
             </div>
         </div>

@@ -26,4 +26,6 @@ public interface UserRepository extends JpaRepository<User, Long> {
     java.util.List<User> findAllWithoutAttendances();
 
     Optional<User> findByCc(String cc);
+
+    Optional<User> findByZkPin(String zkPin);
 }

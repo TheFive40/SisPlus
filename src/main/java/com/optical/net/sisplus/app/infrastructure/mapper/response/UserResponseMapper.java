@@ -37,6 +37,7 @@ public class UserResponseMapper {
                 .name(user.getName())
                 .lastName(user.getLastName())
                 .cc(user.getCc())
+                .zkPin(user.getZkPin())
                 .salary(user.getSalary())
                 .regularHours(payroll.getRegularHours())
                 .dayOvertimeHours(payroll.getDayOvertimeHours())
@@ -57,6 +58,7 @@ public class UserResponseMapper {
                 .name(user.getName())
                 .lastName(user.getLastName())
                 .cc(user.getCc())
+                .zkPin(user.getZkPin())
                 .salary(user.getSalary())
                 .build();
     }

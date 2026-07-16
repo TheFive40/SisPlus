@@ -26,6 +26,9 @@ public class User {
     @Column(unique = true, nullable = false)
     private String cc;
 
+    @Column(name = "zk_pin", unique = true)
+    private String zkPin;
+
     private LocalDateTime createdAt = LocalDateTime.now();
 
     private boolean status;

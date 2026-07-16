@@ -13,4 +13,5 @@ public class CargoSettlementRequest {
     private Double cash;
     private Double qr;
     private Double security;
+    private Double expense;
 }

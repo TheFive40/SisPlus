@@ -34,6 +34,7 @@ public abstract class UserMapper {
                 .name(user.getName())
                 .lastName(user.getLastName())
                 .cc(user.getCc())
+                .zkPin(user.getZkPin())
                 .salary(user.getSalary())
                 .attendance(attendanceList)
                 .build();
@@ -56,6 +57,7 @@ public abstract class UserMapper {
                 .name(domain.getName())
                 .lastName(domain.getLastName())
                 .cc(domain.getCc())
+                .zkPin(domain.getZkPin())
                 .salary(domain.getSalary() > 0 ? domain.getSalary() : 1_423_500.0)
                 .attendances(attendanceList)
                 .build();

@@ -13,6 +13,7 @@ public class UserRequest {
     private String name;
     private String lastName;
     private String cc;
+    private String zkPin;
     private Double salary;
 
     private LocalDate date;
